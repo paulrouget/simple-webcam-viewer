@@ -1,13 +1,13 @@
 {
   "name": "Simple Webcam Viewer",
   "description": "Show the webcam",
-  "launch_path": "/index.html",
+  "launch_path": "/simple-webcam-viewer/index.html",
   "developer": {
     "name": "Paul Rouget",
     "url": "http://paulrouget.com"
   },
   "default_locale": "en-US",
   "icons": {
-    "96": "/icon-96.png"
+    "96": "/simple-webcam-viewer/icon-96.png"
   }
 }
