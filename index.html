@@ -75,7 +75,7 @@
 
 
   // Install app
-  if (navigator.mozApps) {
+  if (false && navigator.mozApps) { // Disabled. GUM doesn't work in apps
     var checkIfInstalled = navigator.mozApps.getSelf();
     checkIfInstalled.onsuccess = function () {
       if (checkIfInstalled.result) {
