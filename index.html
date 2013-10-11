@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+
+<meta charset="utf8">
+<title>Simple Webcam Viewer</title>
+
+<div id="view" data-active="false">
+  <button onclick="start()">Click to start</button>
+  <button id="install">install</button>
+  <video autoplay></video>
+</div>
+
+<script>
+  function start() {
+    navigator.getUserMedia = (navigator.getUserMedia ||
+                              navigator.webkitGetUserMedia ||
+                              navigator.mozGetUserMedia ||
+                              navigator.msGetUserMedia);
+
+    navigator.getUserMedia({video:true}, onReady, console.error)
+    function onReady(stream) {
+      var view = document.querySelector("#view");
+      var video = document.querySelector("#view > video");
+      video.addEventListener("click", rotate);
+      view.dataset.active = true;
+      video.src = window.URL.createObjectURL(stream);
+      setTimeout(fitVideo, 500); // meh
+    }
+  }
+
+  var rotated = false;
+
+  function rotate() {
+    rotated = !rotated;
+    fitVideo();
+  }
+
+  function fitVideo() {
+    var video = document.querySelector("#view > video");
+
+    var vWidth = video.videoWidth;
+    var vHeight = video.videoHeight;
+    var vRatio = vWidth / vHeight;
+
+    var sWidth = rotated ? window.innerHeight : window.innerWidth;
+    var sHeight = rotated ? window.innerWidth : window.innerHeight;
+    var sRatio = sWidth / sHeight;
+
+    if (sRatio < vRatio) {
+      video.width = sWidth;
+      video.removeAttribute("height");
+
+      var new_vHeight = ~~(sWidth / vRatio);
+
+      if (!rotated) {
+        video.style.transform = "scaleY(" + sHeight / new_vHeight + ")";
+      } else {
+        video.style.transform = "translateX(" + sHeight + "px) rotate(90deg) scaleY(" + sHeight / new_vHeight + ")";
+      }
+    } else {
+      video.height = sHeight;
+      video.removeAttribute("width");
+
+      var new_vWidth = ~~(sHeight * vRatio);
+      if (!rotated) {
+        video.style.transform = "scaleX(" + sWidth / new_vWidth + ")";
+      } else {
+        video.style.transform = "translateY(" + sWidth + "px) rotate(-90deg) scaleX(" + sWidth / new_vWidth + ")";
+      }
+    }
+
+  }
+
+  window.addEventListener("resize", fitVideo);
+
+
+
+  // Install app
+  if (navigator.mozApps) {
+    var checkIfInstalled = navigator.mozApps.getSelf();
+    checkIfInstalled.onsuccess = function () {
+      if (checkIfInstalled.result) {
+        // Already installed
+      } else {
+        var install = document.querySelector("#install"),
+        manifestURL = location.href.substring(0, location.href.lastIndexOf("/")) + "/manifest.webapp";
+        install.className = "show-install";
+        install.onclick = function () {
+          var installApp = navigator.mozApps.install(manifestURL);
+          installApp.onsuccess = function(data) {
+            install.style.display = "none";
+          };
+          installApp.onerror = function() {
+            alert("Install failed\n\n:" + installApp.error.name);
+          }
+        }
+      }
+    }
+  }
+
+</script>
+
+<style>
+  html, body, #view {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+  }
+  #view[data-active="false"] > video,
+  #view[data-active="true"] > button {
+    display: none;
+  }
+
+  button {
+    display: block;
+    border: 1px solid #333;
+    background: #EEE;
+    width: 300px;
+    margin: auto;
+    padding: 30px 0;
+  }
+
+  video {
+    display: block;
+    background: #F06;
+    transform-origin: top left;
+  }
+
+  #install:not(.show-install) {
+    display: none;
+  }
+</style>
+
